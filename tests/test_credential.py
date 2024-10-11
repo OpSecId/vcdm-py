@@ -7,6 +7,7 @@ CREDENTIALS = [
         "@context": ["https://www.w3.org/ns/credentials/v2"],
         "type": ["VerifiableCredential"],
         "issuer": "urn:uuid:1ad93a1e-651f-449a-9b0a-9f4c57625f27",
+        "validFrom": "2015-05-10T12:30:00Z",
         "credentialSubject": {"id": "urn:uuid:5c396585-56b3-4f1e-92f8-3d6ee863b704"},
     }
 ]

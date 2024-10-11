@@ -9,7 +9,7 @@ def valid_datetime_string(datetime_string):
     try:
         datetime.fromisoformat(datetime_string)
         return True
-    except:
+    except ValueError:
         return False
 
 
