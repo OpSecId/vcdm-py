@@ -3,6 +3,7 @@ import base64
 from datetime import datetime, timezone, timedelta
 import re
 import rfc3987
+import validators
 
 
 def valid_datetime_string(datetime_string):
@@ -18,6 +19,10 @@ def valid_did(value):
     if DID_REGEX.match(value):
         return True
     return False
+
+
+def valid_url(value):
+    return validators.url(value)
 
 
 def valid_uri(value):

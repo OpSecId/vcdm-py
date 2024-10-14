@@ -1,6 +1,7 @@
 from typing import Dict, Any, List, Union
 from pydantic import BaseModel, Field, field_validator
 from vcdm.models.proof import DataIntegrityProof
+from vcdm.validations import valid_datetime_string, valid_uri, valid_url
 
 
 class BaseModel(BaseModel):
@@ -58,9 +59,9 @@ class Presentation(BaseModel):
     @classmethod
     def validate_presentation_context(cls, value):
         assert value[0] == "https://www.w3.org/ns/credentials/v2"
-        # assert LinkedData().is_valid_context(value.copy())
-        # for item in value[1:]:
-        #     assert LinkedData().is_valid_context(item)
+        for item in value[1:]:
+            if isinstance(item, str):
+                assert valid_url(item)
         return value
 
     @field_validator("id")

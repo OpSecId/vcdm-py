@@ -2,7 +2,7 @@ from typing import Union, List, Dict, Any
 from pydantic import Field, BaseModel, field_validator
 from pydantic.json_schema import SkipJsonSchema
 from vcdm.models.proof import DataIntegrityProof
-from vcdm.validations import valid_datetime_string, valid_uri
+from vcdm.validations import valid_datetime_string, valid_uri, valid_url
 
 
 class NameField(BaseModel, extra="forbid"):
@@ -25,12 +25,18 @@ class BaseModel(BaseModel, extra="allow"):
         Union[str, DescriptionField, List[DescriptionField]]
     ] = Field(None)
 
+    @field_validator("id")
+    @classmethod
+    def validate_credential_id(cls, value):
+        assert valid_uri(value)
+        return value
+
     def model_dump(self, **kwargs) -> Dict[str, Any]:
         return super().model_dump(by_alias=True, exclude_none=True, **kwargs)
 
 
 class Issuer(BaseModel):
-    pass
+    id: SkipJsonSchema[str] = Field()
 
 
 class RelatedResource(BaseModel):
@@ -86,13 +92,7 @@ class RenderMethod(BaseModel):
 
 
 class Credential(BaseModel):
-    context: Union[str, dict, List[Union[str, dict]]] = Field(
-        alias="@context",
-        example=[
-            "https://www.w3.org/ns/credentials/v2",
-            "https://www.w3.org/ns/credentials/examples/v2",
-        ],
-    )
+    context: List[Union[str, dict]] = Field(alias="@context")
     type: Union[str, List[str]] = Field()
     issuer: Union[Issuer, str] = Field()
     validFrom: SkipJsonSchema[str] = Field(None)
@@ -118,17 +118,10 @@ class Credential(BaseModel):
     @field_validator("context")
     @classmethod
     def validate_context(cls, value):
-        asserted_value = value if isinstance(value, list) else [value]
-        assert asserted_value[0] == "https://www.w3.org/ns/credentials/v2"
-        # assert LinkedData().is_valid_context(asserted_value.copy())
-        # for item in asserted_value[1:]:
-        #     assert LinkedData().is_valid_context(item)
-        return value
-
-    @field_validator("id")
-    @classmethod
-    def validate_credential_id(cls, value):
-        assert valid_uri(value)
+        assert value[0] == "https://www.w3.org/ns/credentials/v2"
+        for item in value[1:]:
+            if isinstance(item, str):
+                assert valid_url(item)
         return value
 
     @field_validator("type")
@@ -138,13 +131,12 @@ class Credential(BaseModel):
         assert "VerifiableCredential" in asserted_value
         return value
 
-    # @field_validator("issuer")
-    # @classmethod
-    # def validate_issuer(cls, value):
-    #     assert isinstance(value, str) or isinstance(value, dict)
-    #     assert "id" in value if isinstance(value, dict) else True
-    #     assert value if isinstance(value, str) else value["id"]
-    #     return value
+    @field_validator("issuer")
+    @classmethod
+    def validate_issuer(cls, value):
+        if isinstance(value, str):
+            assert valid_uri(value)
+            return value
 
     @field_validator("validFrom")
     @classmethod
