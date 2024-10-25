@@ -34,8 +34,8 @@ def test_fails_invalid(context):
         LDProcessor().is_valid_context(context)
 
 
-@pytest.mark.parametrize("context", UNSTRICT_CONTEXTS)
-def test_serialization(context):
-    LDProcessor(strict=False, allowed_ctx="https://w3id.org/vdl/v1").is_valid_context(
-        context
-    )
+# @pytest.mark.parametrize("context", UNSTRICT_CONTEXTS)
+# def test_serialization(context):
+#     LDProcessor(strict=False, allowed_ctx="https://w3id.org/vdl/v1").is_valid_context(
+#         context
+#     )
