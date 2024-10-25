@@ -82,12 +82,12 @@ class Credential(BaseModel):
     context: List[Union[str, dict]] = Field(alias="@context")
     type: Union[str, List[str]] = Field()
     issuer: Union[Issuer, str] = Field()
-    
+
     validFrom: SkipJsonSchema[str] = Field(None)
     validUntil: SkipJsonSchema[str] = Field(None)
     issuanceDate: SkipJsonSchema[str] = Field(None)
     expirationDate: SkipJsonSchema[str] = Field(None)
-    
+
     credentialSubject: Union[List[CredentialSubject], CredentialSubject] = Field()
     credentialStatus: SkipJsonSchema[
         Union[List[CredentialStatus], CredentialStatus]
@@ -95,7 +95,7 @@ class Credential(BaseModel):
     credentialSchema: SkipJsonSchema[
         Union[List[CredentialSchema], CredentialSchema]
     ] = Field(None)
-    
+
     termsOfUse: SkipJsonSchema[Union[List[TermsOfUse], TermsOfUse]] = Field(None)
     refreshService: SkipJsonSchema[Union[List[RefreshService], RefreshService]] = Field(
         None
@@ -112,7 +112,7 @@ class Credential(BaseModel):
     def validate_context(cls, value):
         assert value[0] in [
             "https://www.w3.org/2018/credentials/v1",
-            "https://www.w3.org/ns/credentials/v2"
+            "https://www.w3.org/ns/credentials/v2",
         ]
         for item in value[1:]:
             if isinstance(item, str):
@@ -130,7 +130,7 @@ class Credential(BaseModel):
     @classmethod
     def validate_issuer(cls, value):
         if isinstance(value, str):
-            value = value if isinstance(value, str) else value['id']
+            value = value if isinstance(value, str) else value["id"]
             assert valid_uri(value)
             return value
 

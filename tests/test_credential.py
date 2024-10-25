@@ -36,23 +36,19 @@ INVALID_CREDENTIALS = [
         "credentialSubject": {"id": "did:example:subject"},
     },
     {
-    "credential": {
-        "@context": [
-        "https://www.w3.org/ns/credentials/v2"
-        ],
-        "type": [
-        "VerifiableCredential"
-        ],
-        "issuer": {
-        "description": {
-            "@value": "An Example Issuer",
-            "@language": "en",
-            "url": "did:example:issuer"
-        },
-        "id": "did:key:123"
+        "credential": {
+            "@context": ["https://www.w3.org/ns/credentials/v2"],
+            "type": ["VerifiableCredential"],
+            "issuer": {
+                "description": {
+                    "@value": "An Example Issuer",
+                    "@language": "en",
+                    "url": "did:example:issuer",
+                },
+                "id": "did:key:123",
+            },
         }
-    }
-    }
+    },
 ]
 
 

@@ -1,7 +1,7 @@
 from typing import Dict, Any, List, Union
 from pydantic import BaseModel, Field, field_validator
 from vcdm.models.proof import DataIntegrityProof
-from vcdm.validations import valid_datetime_string, valid_uri, valid_url
+from vcdm.validations import valid_url
 
 
 class BaseModel(BaseModel):
