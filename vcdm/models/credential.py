@@ -18,8 +18,8 @@ class DescriptionField(BaseModel, extra="forbid"):
 
 
 class BaseModel(BaseModel, extra="allow"):
-    id: SkipJsonSchema[str] = Field(None)
     type: Union[str, List[str]] = Field(None)
+    id: SkipJsonSchema[str] = Field(None)
     name: SkipJsonSchema[Union[str, NameField, List[NameField]]] = Field(None)
     description: SkipJsonSchema[
         Union[str, DescriptionField, List[DescriptionField]]
@@ -53,11 +53,6 @@ class CredentialSchema(BaseModel):
     id: Union[str, List[str]] = Field()
     type: Union[str, List[str]] = Field()
 
-    @field_validator("id")
-    @classmethod
-    def validate_credential_schema_id(cls, value):
-        assert valid_uri(value)
-
 
 class CredentialStatus(BaseModel):
     id: str = Field(None)
@@ -65,14 +60,6 @@ class CredentialStatus(BaseModel):
     statusPurpose: str = Field(None)
     statusListIndex: str = Field(None)
     statusListCredential: str = Field(None)
-
-    @field_validator("id")
-    @classmethod
-    def validate_credential_status_id(cls, value):
-        if value:
-            assert valid_uri(value)
-
-        return value
 
 
 class TermsOfUse(BaseModel):
@@ -88,15 +75,19 @@ class Evidence(BaseModel):
 
 
 class RenderMethod(BaseModel):
-    pass
+    type: Union[str, List[str]] = Field()
 
 
 class Credential(BaseModel):
     context: List[Union[str, dict]] = Field(alias="@context")
     type: Union[str, List[str]] = Field()
     issuer: Union[Issuer, str] = Field()
+    
     validFrom: SkipJsonSchema[str] = Field(None)
     validUntil: SkipJsonSchema[str] = Field(None)
+    issuanceDate: SkipJsonSchema[str] = Field(None)
+    expirationDate: SkipJsonSchema[str] = Field(None)
+    
     credentialSubject: Union[List[CredentialSubject], CredentialSubject] = Field()
     credentialStatus: SkipJsonSchema[
         Union[List[CredentialStatus], CredentialStatus]
@@ -104,6 +95,7 @@ class Credential(BaseModel):
     credentialSchema: SkipJsonSchema[
         Union[List[CredentialSchema], CredentialSchema]
     ] = Field(None)
+    
     termsOfUse: SkipJsonSchema[Union[List[TermsOfUse], TermsOfUse]] = Field(None)
     refreshService: SkipJsonSchema[Union[List[RefreshService], RefreshService]] = Field(
         None
@@ -118,7 +110,10 @@ class Credential(BaseModel):
     @field_validator("context")
     @classmethod
     def validate_context(cls, value):
-        assert value[0] == "https://www.w3.org/ns/credentials/v2"
+        assert value[0] in [
+            "https://www.w3.org/2018/credentials/v1",
+            "https://www.w3.org/ns/credentials/v2"
+        ]
         for item in value[1:]:
             if isinstance(item, str):
                 assert valid_url(item)
@@ -135,8 +130,21 @@ class Credential(BaseModel):
     @classmethod
     def validate_issuer(cls, value):
         if isinstance(value, str):
+            value = value if isinstance(value, str) else value['id']
             assert valid_uri(value)
             return value
+
+    @field_validator("issuanceDate")
+    @classmethod
+    def validate_issuance_date(cls, value):
+        assert valid_datetime_string(value)
+        return value
+
+    @field_validator("expirationDate")
+    @classmethod
+    def validate_expiration_date(cls, value):
+        assert valid_datetime_string(value)
+        return value
 
     @field_validator("validFrom")
     @classmethod
@@ -166,18 +174,6 @@ class Credential(BaseModel):
             assert valid_uri(ressource.id)
             assert ressource.digestSRI or ressource.digestMultibase
         return value
-
-    # @field_validator("credentialStatus")
-    # @classmethod
-    # def validate_credential_status(cls, value):
-    #     assert isinstance(value, dict) or isinstance(value, list)
-    #     assert (
-    #         all(isinstance(item, dict) for item in value)
-    #         if isinstance(value, list)
-    #         else True
-    #     )
-    #     assert "type" in value or all("type" in item for item in value)
-    #     return value
 
     # def add_validity_period():
     #     validFrom = str(datetime.now().isoformat("T", "seconds"))
